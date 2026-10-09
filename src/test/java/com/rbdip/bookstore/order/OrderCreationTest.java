@@ -9,6 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.rbdip.bookstore.customer.Customer;
+import com.rbdip.bookstore.customer.CustomerService;
 import com.rbdip.bookstore.product.Product;
 import com.rbdip.bookstore.product.ProductRepository;
 import java.math.BigDecimal;
@@ -57,12 +59,15 @@ class OrderCreationTest {
         OrderRepository orders = mock(OrderRepository.class);
         OrderItemRepository orderItems = mock(OrderItemRepository.class);
         OrderConfirmationNotifier notifier = mock(OrderConfirmationNotifier.class);
+        CustomerService customers = mock(CustomerService.class);
+        when(customers.findOrCreate("Customer", "Address", null))
+                .thenReturn(new Customer("Customer", "Address", null));
         when(products.findById(1L)).thenReturn(Optional.of(new Product("Book", BigDecimal.TEN, null)));
         Order saved = mock(Order.class);
         when(saved.getId()).thenReturn(2L);
         when(orders.save(any(Order.class))).thenReturn(saved);
         OrderService service = new OrderService(new OrderRequestValidator(), new OrderItemResolver(products),
-                new PricingCalculator(), new OrderWriter(orders, orderItems), notifier);
+                new PricingCalculator(), new OrderWriter(customers, orders, orderItems), notifier);
         CreateOrderRequest request = new CreateOrderRequest(
                 "Customer", "Address", null, null, null, List.of(new CreateOrderRequest.Item(1L, 2)));
 
