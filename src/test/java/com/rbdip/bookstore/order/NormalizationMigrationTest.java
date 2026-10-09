@@ -41,7 +41,7 @@ class NormalizationMigrationTest {
     void preservesPopulatedOrdersAndRecoversMissingHistoricalProducts() {
         seedLegacyData();
 
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(1);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(4);
 
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM customers", Integer.class)).isEqualTo(3);
         assertThat(jdbc.queryForList("SELECT id FROM orders ORDER BY id", Long.class))
@@ -82,7 +82,7 @@ class NormalizationMigrationTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
         assertThatThrownBy(() -> jdbc.update("INSERT INTO order_items(order_id, quantity) VALUES (1, 1)"))
                 .isInstanceOf(DataIntegrityViolationException.class);
-        assertThatThrownBy(() -> jdbc.update("INSERT INTO customers(full_name) VALUES ('Customer')"))
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO customers(first_name) VALUES ('Customer')"))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
@@ -90,7 +90,7 @@ class NormalizationMigrationTest {
     void migratesEmptyDatabaseAndAcceptsNewNormalizedRows() {
         flyway.migrate();
 
-        jdbc.update("INSERT INTO customers(full_name, address) VALUES ('New customer', 'Address')");
+        jdbc.update("INSERT INTO customers(first_name, last_name, address) VALUES ('New', 'customer', 'Address')");
         jdbc.update("INSERT INTO products(name, price) VALUES ('New book', 15.00)");
         jdbc.update("INSERT INTO orders(customer_id, status) VALUES (1, 'new')");
         jdbc.update("INSERT INTO order_items(order_id, product_id, quantity) VALUES (1, 1, 2)");

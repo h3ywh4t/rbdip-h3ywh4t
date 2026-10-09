@@ -40,7 +40,8 @@ class NormalizedOrderTest extends AbstractIntegrationTest {
                 JOIN customers c ON c.id = o.customer_id
                 JOIN order_items i ON i.order_id = o.id
                 JOIN products p ON p.id = i.product_id
-                WHERE c.full_name = 'Customer' AND p.name = 'Book' AND i.quantity = 1
+                WHERE c.first_name = 'Customer' AND c.last_name IS NULL
+                  AND p.name = 'Book' AND i.quantity = 1
                 """, Integer.class)).isEqualTo(2);
     }
 
@@ -54,7 +55,7 @@ class NormalizedOrderTest extends AbstractIntegrationTest {
 
         assertThat(count("customers")).isEqualTo(3);
         assertThat(jdbcTemplate.queryForObject("""
-                SELECT COUNT(*) FROM customers WHERE full_name = 'Customer' AND phone IS NULL
+                SELECT COUNT(*) FROM customers WHERE first_name = 'Customer' AND phone IS NULL
                 """, Integer.class)).isEqualTo(2);
     }
 

@@ -14,8 +14,10 @@ public class CustomerService {
 
     @Transactional
     public Customer findOrCreate(String fullName, String address, String phone) {
-        customerRepository.insertIfAbsent(fullName, address, phone);
-        return customerRepository.findByFullNameAndAddressAndPhone(fullName, address, phone)
+        CustomerName name = CustomerName.fromFullName(fullName);
+        customerRepository.insertIfAbsent(name.firstName(), name.lastName(), address, phone);
+        return customerRepository.findByFirstNameAndLastNameAndAddressAndPhone(
+                name.firstName(), name.lastName(), address, phone)
                 .orElseThrow(() -> new IllegalStateException("customer was not persisted"));
     }
 }

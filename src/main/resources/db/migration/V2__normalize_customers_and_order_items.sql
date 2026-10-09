@@ -48,10 +48,32 @@ ALTER TABLE order_items
 CREATE INDEX order_items_product_id_idx ON order_items(product_id);
 
 ALTER TABLE orders
-    DROP COLUMN customer_full_name,
     DROP COLUMN customer_address,
     DROP COLUMN customer_phone;
 
 ALTER TABLE order_items
     DROP COLUMN product_name,
     DROP COLUMN product_price;
+
+CREATE FUNCTION sync_order_customer_name() RETURNS TRIGGER AS $$
+BEGIN
+    SELECT full_name INTO NEW.customer_full_name FROM customers WHERE id = NEW.customer_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER orders_customer_name_sync
+BEFORE INSERT OR UPDATE OF customer_id ON orders
+FOR EACH ROW EXECUTE FUNCTION sync_order_customer_name();
+
+CREATE FUNCTION sync_customer_order_names() RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE orders SET customer_full_name = NEW.full_name WHERE customer_id = NEW.id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER customers_order_names_sync
+AFTER UPDATE ON customers
+FOR EACH ROW WHEN (OLD.full_name IS DISTINCT FROM NEW.full_name)
+EXECUTE FUNCTION sync_customer_order_names();
