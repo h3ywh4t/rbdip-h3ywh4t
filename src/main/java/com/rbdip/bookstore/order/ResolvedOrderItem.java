@@ -2,7 +2,6 @@ package com.rbdip.bookstore.order;
 
 import com.rbdip.bookstore.product.Product;
 
-/** Keeps a product and its resolved quantity together. */
 public record ResolvedOrderItem(Product product, int quantity) {
 
     public PricingCalculator.LineItem toLineItem() {

@@ -28,7 +28,6 @@ public class Customer {
     private String phone;
 
     protected Customer() {
-        // for JPA
     }
 
     public Customer(String fullName, String address, String phone) {

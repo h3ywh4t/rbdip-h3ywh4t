@@ -1,4 +1,3 @@
--- Identical contact triples represent the same customer, including NULL contacts.
 CREATE TABLE customers (
     id BIGSERIAL PRIMARY KEY,
     full_name VARCHAR(255) NOT NULL,
@@ -26,8 +25,6 @@ ALTER TABLE orders
 
 CREATE INDEX orders_customer_id_idx ON orders(customer_id);
 
--- V1 has no product ID on order_items. Recover by exact name/price;
--- preserve historical snapshots missing from the catalog as product rows.
 INSERT INTO products (name, price)
 SELECT DISTINCT i.product_name, i.product_price
 FROM order_items i
